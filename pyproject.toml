@@ -1,0 +1,155 @@
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
+[project]
+name = "test_py_cookie"
+version = "v0.1.0"
+description = "for exploring github actions"
+authors = [
+    {name="Berk Tosun", email="test@test.com"}
+]
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.9" # for the minimum maintained version: https://devguide.python.org/versions/
+dependencies = [
+]
+
+[project.optional-dependencies]
+dev=[
+    "pip-tools",
+    "pre-commit",
+    "ruff",
+    "commitizen",
+    "mypy",
+]
+doc = [
+    "myst-parser",
+    # "myst-nb",  # jupyter notebooks
+    "sphinxcontrib-napoleon",
+    "sphinx-autodoc-typehints",
+    "furo",
+]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-xdist",
+    "pytest-randomly",
+    "pytest-html",
+]
+[tool.mypy]
+exclude = ["scripts", "docs_src", "tests"]
+
+[tool.black]
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.ruff]
+src = ["src"]
+target-version = "py39"
+select = [
+    "F",      # Errors detected by Pyflakes
+    "E",      # Error detected by Pycodestyle
+    "W",      # Warning detected by Pycodestyle
+    "I",      # isort
+    "D",      # pydocstyle
+    "S",      # flake8-bandit
+    "B",      # flake8-bugbear
+    "TID",    # flake8-tidy-imports
+    "C4",     # flake8-comprehensions
+    "BLE",    # flake8-blind-except
+    "UP",     # pyupgrade
+    "RUF100", # Report unused noqa directives
+]
+ignore = [
+    # line too long -> we accept long comment lines; black gets rid of long code lines
+    "E501",
+    # Do not assign a lambda expression, use a def -> lambda expression assignments are convenient
+    "E731",
+    # Missing docstring in public package
+    "D104",
+    # Missing docstring in public module
+    "D100",
+    # Missing docstring in __init__
+    "D107",
+    # Errors from function calls in argument defaults. These are fine when the result is immutable.
+    "B008",
+    # __magic__ methods are are often self-explanatory, allow missing docstrings
+    "D105",
+    # first line should end with a period [Bug: doesn't work with single-line docstrings]
+    "D400",
+    # First line should be in imperative mood; try rephrasing
+    "D401",
+    ## Disable one in each pair of mutually incompatible rules
+    # We don’t want a blank line before a class docstring
+    "D203",
+    # We want docstrings to start immediately after the opening triple quote
+    "D213",
+]
+[tool.ruff.isort]
+force-single-line = true
+known-first-party = ["src"]
+[tool.ruff.pydocstyle]
+convention = "google"
+
+[tool.ruff.per-file-ignores]
+"docs/*" = ["I"]
+"*/__init__.py" = ["F401"]
+"tests/**/*.py" = [
+    # at least this three should be fine in tests:
+    "S101", # asserts allowed in tests...
+    "ARG",  # Unused function args -> fixtures nevertheless are functionally relevant...
+    "FBT",  # Don't care about booleans as positional arguments in tests, e.g. via @pytest.mark.parametrize()
+    "D",
+]
+
+[tool.pip-tools]
+resolver = "backtracking"
+quiet = true
+allow_unsafe = true
+max_rounds = 3
+strip_extras = true
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "v0.1.0"
+version_files = [
+    "src/test_py_cookie/__init__.py",
+    "pyproject.toml:version"
+]
+update_changelog_on_bump = true
+annotated_tag = true
+major_version_zero = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["tests"]
+log_file = "log_pytest.txt"
+log_format = "%(asctime)s %(levelname)s %(message)s"
+log_date_format = "%Y-%m-%d %H:%M:%S"
+addopts = '''
+    --strict-markers
+    --html=report_pytest.html  --self-contained-html
+'''
+markers = []
+# addopts (additional options):
+#  <main flag>: <explanation>
+#
+#  -n auto: enables `xdist` extension to distribute tests across cpu's
+#  --html=report_pytest.html: create report_pytest.html with a report of test run
+#  --strict-markers: Avoid typos in markers. All must be defined here, below in markers
+#
+#  Commented out:
+#    -n auto
